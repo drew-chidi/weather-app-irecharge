@@ -8,4 +8,13 @@ const getStorageItem = (key: string) => {
 const removeStorageItem = (key: string) => localStorage.removeItem(key);
 const clearStorageItem = () => localStorage.clear();
 
+const saveFavoritesToLocalStorage = (favorites: string[]) => {
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+};
+
+const getFavoritesFromLocalStorage = () => {
+  const storedFavorites = localStorage.getItem('favorites');
+  return storedFavorites ? JSON.parse(storedFavorites) : [];
+};
+
 export { setStorageItem, getStorageItem, removeStorageItem, clearStorageItem };
