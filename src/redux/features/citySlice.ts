@@ -7,7 +7,7 @@ interface CityState {
 
 const initialState: CityState = {
   cities: [],
-  favorites: [],
+  favorites: JSON.parse(localStorage.getItem('favorites') || '[]'),
 };
 
 const citySlice = createSlice({
@@ -18,10 +18,19 @@ const citySlice = createSlice({
       state.cities.push(action.payload);
     },
     addFavorite: (state, action: PayloadAction<string>) => {
-      state.favorites.push(action.payload);
+      if (!state.favorites.includes(action.payload)) {
+        state.favorites.push(action.payload);
+        localStorage.setItem('favorites', JSON.stringify(state.favorites));
+      }
+    },
+    removeFavorite: (state, action: PayloadAction<string>) => {
+      state.favorites = state.favorites.filter(
+        (favorite) => favorite !== action.payload
+      );
+      localStorage.setItem('favorites', JSON.stringify(state.favorites));
     },
   },
 });
 
-export const { addCity, addFavorite } = citySlice.actions;
+export const { addCity, addFavorite, removeFavorite } = citySlice.actions;
 export default citySlice.reducer;

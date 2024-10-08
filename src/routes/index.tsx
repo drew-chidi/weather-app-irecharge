@@ -9,7 +9,7 @@ const AllRoutes = (props: Props) => {
     <Router>
       <Routes>
         <Route path='/' element={<HomePage />} />
-        <Route path='/:name' element={<CityDetailsPage />} />
+        <Route path='/:city' element={<CityDetailsPage />} />
       </Routes>
     </Router>
   );

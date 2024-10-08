@@ -1,5 +1,3 @@
-// src/services/geonamesApi.js
-
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const geonamesApi = createApi({

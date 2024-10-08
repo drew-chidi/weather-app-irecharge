@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -6,37 +5,55 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { DeleteIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-type CityListType = {
-  onDelete: () => void;
+type Props = {
+  onDelete: (city: string) => void;
+  city: string;
+  temperature: number;
+  condition: string;
+  icon: string;
 };
 
-export function CityListCard({}: Props) {
+export function CityListCard({
+  onDelete,
+  city,
+  temperature,
+  condition,
+  icon,
+}: Props) {
   return (
-    <Card className='w-[350px]'>
+    <Card className=''>
       <CardHeader>
-        <div className='flex items-center justify-between'>
-          <CardTitle className='font-bold'>Athens</CardTitle>
-          <button className='bg-transparent text-xl font-bold m-0 p-0'>
-            ...
-          </button>
+        <div className='flex items-center justify-between gap-5'>
+          <CardTitle className='font-bold'>{city}</CardTitle>
+          <DeleteIcon
+            color='red'
+            onClick={() => {
+              onDelete(city);
+              console.log('killllllllll');
+            }}
+          />
         </div>
-        {/* <CardDescription>Deploy your new project in one-click.</CardDescription> */}
       </CardHeader>
       <CardContent>
         <>
-          <div className='grid w-full items-center gap-4'>
-            <div className='flex items-center gap-8 justify-between'>
-              <p className='text-4xl font-bold'>
-                24<sup>o</sup>C
+          <div className=''>
+            <div className=''>
+              <img src={icon} className='rounded-lg w-10 h-10' />
+              <p className='text-4xl font-bold mt-4'>
+                {temperature}
+                <sup>o</sup>C
               </p>
-              <p>Raining off and on</p>
             </div>
           </div>
         </>
       </CardContent>
       <CardFooter className='flex justify-center'>
-        <Button variant='outline'>See full forecast</Button>
+        <Link to={`/${city}`} className='hover:underline'>
+          See full forecast
+        </Link>
       </CardFooter>
     </Card>
   );
