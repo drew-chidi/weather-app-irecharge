@@ -64,7 +64,6 @@ const useFavorites = () => {
             icon: data.current.weather_icons[0],
           };
 
-          // Update favorite weather data state and localStorage
           setFavoriteWeatherData((prev) => {
             const updatedData = [...prev, transformedData];
             localStorage.setItem(
@@ -89,15 +88,6 @@ const useFavorites = () => {
       localStorage.setItem('favoriteWeatherData', JSON.stringify([]));
     }
   }, [favoriteCities]);
-
-  // useEffect(() => {
-  //   if (favoriteWeatherData.length > 0) {
-  //     localStorage.setItem(
-  //       'favoriteWeatherData',
-  //       JSON.stringify(favoriteWeatherData)
-  //     );
-  //   }
-  // }, [favoriteWeatherData]);
 
   // Function to toggle favorite city
   const toggleFavorite = (city: string) => {

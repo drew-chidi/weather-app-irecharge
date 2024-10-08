@@ -22,7 +22,22 @@ export type CurrentWeatherType = {
   visibility: number;
 };
 
+export interface ListWeatherData {
+  id: string;
+  city: string;
+  temperature: number;
+  condition: string;
+  icon: string;
+}
+
+type ErrorType = {
+  code: number;
+  info: string;
+};
+
 export type CurrentLocationWeatherType = {
   location: LocationType;
   current: CurrentWeatherType;
+  success?: boolean;
+  error?: ErrorType;
 };

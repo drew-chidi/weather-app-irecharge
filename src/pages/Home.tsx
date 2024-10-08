@@ -1,27 +1,32 @@
-import { CityListCard } from '@/components/CityListCard';
-import CurrentSection from '@/components/CurrentSection';
+import { LocateIcon, Search } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import CurrentWeather from '@/components/sections/CurrentWeather';
+import Favourites from '@/components/sections/Favourites';
+import TopCities from '@/components/sections/TopCities';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CITIES } from '@/constant/cities';
 import useFavorites from '@/hook/useFavorites';
-import useFetchWeatherData, { WeatherData } from '@/hook/useWeatherData';
+import useFetchWeatherData from '@/hook/useWeatherData';
 import {
   useGetCurrentWeatherByCityQuery,
   useGetWeatherByCoordsQuery,
 } from '@/redux/services/weatherApi';
-import { Heart, LocateFixedIcon, Search } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import SearchResultSection from '@/components/sections/SeachResult';
 
 const HomePage = () => {
-  const [topCities, setTopCities] = useState(CITIES);
+  const [topCities] = useState(CITIES);
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
     null
   );
-  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const { weatherData: topCitiesResponse, loading: isLoadingTopCities } =
-    useFetchWeatherData(topCities);
+  const {
+    weatherData: topCitiesResponse,
+    loading: isLoadingTopCities,
+    refreshData: fetchUpdatedTopCitiesData,
+    removeCity,
+  } = useFetchWeatherData(topCities);
   const {
     favoriteWeatherData,
     loading: isLoadingFavorites,
@@ -30,17 +35,12 @@ const HomePage = () => {
 
   const [activateSearch, setActivateSearch] = useState(false);
 
-  const {
-    data: searchResponse,
-    error: searchError,
-    isLoading: isSearchingCityWeather,
-  } = useGetCurrentWeatherByCityQuery(searchQuery, {
-    skip: !activateSearch,
-  });
-
-  const handleRemoveCity = (city: string) => {
-    setTopCities((prev) => prev.filter((c) => c !== city));
-  };
+  const { data: searchResponse } = useGetCurrentWeatherByCityQuery(
+    searchQuery,
+    {
+      skip: !activateSearch,
+    }
+  );
 
   const handleLocationClick = () => {
     if (navigator.geolocation) {
@@ -49,14 +49,12 @@ const HomePage = () => {
           const { latitude, longitude } = position.coords;
           setLocation({ lat: latitude, lon: longitude });
         },
-        (error) => {
-          setError(
-            `Location access denied. Please allow location access. ${error}`
-          );
+        () => {
+          toast.error(`Location access denied. Please allow location access.`);
         }
       );
     } else {
-      setError('Geolocation is not supported by your browser.');
+      toast.error('Geolocation is not supported by your browser.');
     }
   };
 
@@ -98,105 +96,59 @@ const HomePage = () => {
   }, [searchQuery]);
 
   return (
-    <div className='p-8 lg:px-16 lg:py-10'>
-      <div className='flex items-center gap-4 w-full justify-between mb-12'>
-        <div className='relative flex items-center w-full max-w-[12.5rem]'>
-          <Input
-            className='px-4 pr-12 py-2 rounded-xl'
-            type='text'
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onKeyDown={handleKeyDown}
-            placeholder='Search for a city by pressing enter...'
-          />
-          <Search
-            className='absolute right-2 text-muted-foreground cursor-pointer'
-            onClick={handleSearchSubmit}
-          />
+    <div className='p-8 lg:px-16 lg:py-10 max-w-[80rem] mx-auto'>
+      <div className=' mb-12'>
+        <div className='flex items-center gap-4 w-full justify-between'>
+          <div>
+            <div className='relative flex items-center w-full max-w-[12.5rem] sm:min-w-[20rem] sm:max-w-[30rem]'>
+              <Input
+                className='px-4 pr-12 py-2 rounded-xl w-full outline-0 z-20'
+                type='text'
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
+                placeholder='Search for a city by pressing enter...'
+              />
+              <Search
+                className='bg-[#4CBB17] p-1 rounded-md text-white absolute right-2 text-muted-foreground cursor-pointer z-30'
+                onClick={handleSearchSubmit}
+              />
+            </div>
+          </div>
+          <Button
+            className='bg-[#4CBB17] hover:bg-[#4CBB17]/80  rounded-xl'
+            onClick={handleLocationClick}
+          >
+            <LocateIcon className='mr-2 text-white' /> Current Location
+          </Button>
         </div>
-        <Button
-          className='bg-[#4CBB17] hover:bg-[#4CBB17]/80'
-          onClick={handleLocationClick}
-        >
-          <LocateFixedIcon className='text-black mr-2' /> Current Location
-        </Button>
+        <div className='w-full flex justify-end mt-6'>
+          <CurrentWeather data={currentLocationResponse} />
+        </div>
       </div>
-
-      {/* Search Result Section */}
+      {/* Search Result Here */}
       {searchQuery?.trim().length > 0 && (
         <div className='mb-10'>
-          {searchResponse ? (
-            <CurrentSection data={searchResponse} hasFavorite />
+          {searchResponse?.location || searchResponse?.current ? (
+            <SearchResultSection data={searchResponse} hasFavorite />
           ) : (
             <p>No data found for this search input</p>
           )}
           <hr className='mt-14 mb-20 border botder-border' />
         </div>
       )}
-
-      {/* Favorites */}
-      <div>
-        <h2 className='mb-3.5 font-bold text-[#333] flex items-center gap-2'>
-          Favourite Cities <Heart fill='red' className='animate-pulse' />
-        </h2>
-        {isLoadingFavorites ? (
-          <p>Loading weather data...</p>
-        ) : favoriteWeatherData && favoriteWeatherData.length > 0 ? (
-          <div className='flex gap-6 flex-wrap flex-grow'>
-            {favoriteWeatherData.map(
-              ({ city, temperature, condition, icon }: WeatherData) => (
-                <CityListCard
-                  key={city}
-                  onDelete={removeFavoriteCity}
-                  // onDelete={() => dispatch(removeFavorite(city))}
-                  city={city}
-                  temperature={temperature}
-                  condition={condition}
-                  icon={icon}
-                />
-              )
-            )}
-          </div>
-        ) : (
-          <div>
-            <p>No Favorite added yet</p>
-          </div>
-        )}
-        <hr className='mt-14 mb-20 border botder-border' />
-      </div>
-
-      {/* Current Location Weather */}
-      <div className='mb-10'>
-        <CurrentSection data={currentLocationResponse} />
-        <hr className='mt-14 mb-20 border botder-border' />
-      </div>
-
-      {/* Top Cities */}
-      <div className='cursor-pointer'>
-        <h2 className='mb-3.5 font-bold text-[#333]'>Top Cities</h2>
-        {isLoadingTopCities ? (
-          <p>Loading weather data...</p>
-        ) : topCitiesResponse &&
-          Array.isArray(topCitiesResponse) &&
-          topCitiesResponse.length > 0 ? (
-          <div className='flex gap-6 flex-wrap flex-grow'>
-            {topCitiesResponse.map(
-              ({ city, temperature, condition, icon }: WeatherData) => (
-                <CityListCard
-                  key={city}
-                  onDelete={handleRemoveCity}
-                  city={city}
-                  temperature={temperature}
-                  condition={condition}
-                  icon={icon}
-                />
-              )
-            )}
-          </div>
-        ) : (
-          <p>No data available for the cities.</p>
-        )}
-      </div>
+      <Favourites
+        data={favoriteWeatherData}
+        isLoading={isLoadingFavorites}
+        onRemove={removeFavoriteCity}
+        onRefresh={fetchUpdatedTopCitiesData}
+      />
+      <TopCities
+        data={topCitiesResponse}
+        isLoading={isLoadingTopCities}
+        onDelete={removeCity}
+        onRefresh={fetchUpdatedTopCitiesData}
+      />
     </div>
   );
 };

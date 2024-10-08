@@ -10,7 +10,7 @@ type Props = {
   hasFavorite?: boolean;
 };
 
-const CurrentSection = ({ data, hasFavorite }: Props) => {
+const SearchResultSection = ({ data, hasFavorite }: Props) => {
   const dispatch = useDispatch();
   const favorites = useSelector((state: RootState) => state.city.favorites);
   const [favorite, setFavorite] = useState(
@@ -63,7 +63,7 @@ const CurrentSection = ({ data, hasFavorite }: Props) => {
           </div>
           {hasFavorite && (
             <Heart
-              fill={`${favorite ? 'red' : ''}`}
+              fill={`${favorite ? '#4CBB17' : ''}`}
               onClick={handleFavoriteClick}
             />
           )}
@@ -138,4 +138,4 @@ const CurrentSection = ({ data, hasFavorite }: Props) => {
   );
 };
 
-export default CurrentSection;
+export default SearchResultSection;

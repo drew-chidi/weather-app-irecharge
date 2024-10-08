@@ -43,7 +43,7 @@ const CityDetailsPage = () => {
   }, [city]);
 
   return (
-    <div>
+    <div className='max-w-[80rem] mx-auto'>
       <div className=' px-8 sm:px-14 lg:px-20 py-10'>
         <Link to='/'>
           <HomeIcon className='w-14 h-14' />

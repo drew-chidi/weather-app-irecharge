@@ -1,36 +1,31 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { ListWeatherData } from '@/types/weather.type';
 
-export interface WeatherData {
-  city: string;
-  temperature: number;
-  condition: string;
-  icon: string;
-}
+const apiUrl = import.meta.env.VITE_WEATHERSTACK_URL;
+const accessKey = import.meta.env.VITE_ACCESS_KEY;
 
-const useFetchWeatherData = (cities: string[]) => {
-  const [weatherData, setWeatherData] = useState<{
-    [key: string]: WeatherData;
-  }>(() => {
+const useTopCitiesWeatherData = (cities: string[]) => {
+  const [weatherData, setWeatherData] = useState<ListWeatherData[]>(() => {
     const storedData = localStorage.getItem('weatherData');
-    return storedData ? JSON.parse(storedData) : {};
+    return storedData ? JSON.parse(storedData) : [];
   });
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const apiUrl = import.meta.env.VITE_WEATHERSTACK_URL;
-  const accessKey = import.meta.env.VITE_ACCESS_KEY;
 
   useEffect(() => {
     const fetchDataSequentially = async () => {
       setLoading(true);
-      setError(null);
 
       for (const city of cities) {
-        if (weatherData[city]) {
+        if (
+          weatherData.some(
+            (item) => item.city.toLowerCase() === city.toLowerCase()
+          )
+        ) {
           continue;
         }
+
         try {
           const response = await axios.get(`${apiUrl}/current`, {
             params: {
@@ -40,30 +35,24 @@ const useFetchWeatherData = (cities: string[]) => {
           });
 
           const data = response.data;
-          const transformedData: WeatherData = {
+          const transformedData: ListWeatherData = {
+            id: data.location.name,
             city: data.location.name,
             temperature: data.current.temperature,
             condition: data.current.weather_descriptions[0],
             icon: data.current.weather_icons[0],
           };
 
-          console.log({ transformedData });
-
           setWeatherData((prev) => {
-            const updatedWeatherData = {
-              ...prev,
-              [city]: transformedData,
-            };
+            const updatedWeatherData = [...prev, transformedData];
             localStorage.setItem(
               'weatherData',
               JSON.stringify(updatedWeatherData)
             );
-
             return updatedWeatherData;
           });
         } catch (error) {
-          setError(`${error}: Failed to fetch weather for ${city}`);
-          toast.error(`Failed to fetch weather for ${city}`);
+          toast.error(`${error}: Failed to fetch weather for ${city}`);
         }
       }
 
@@ -75,11 +64,63 @@ const useFetchWeatherData = (cities: string[]) => {
     }
   }, [cities]);
 
-  const sortedWeatherData = Object.values(weatherData).sort((a, b) =>
+  // Refresh function
+  const refreshData = () => {
+    localStorage.removeItem('weatherData');
+    setWeatherData([]);
+    cities.forEach((city) => {
+      axios
+        .get(`${apiUrl}/current`, {
+          params: {
+            access_key: accessKey,
+            query: city,
+          },
+        })
+        .then((response) => {
+          const data = response.data;
+          const transformedData: ListWeatherData = {
+            id: data.location.name,
+            city: data.location.name,
+            temperature: data.current.temperature,
+            condition: data.current.weather_descriptions[0],
+            icon: data.current.weather_icons[0],
+          };
+
+          setWeatherData((prev) => {
+            const updatedWeatherData = [...prev, transformedData];
+            localStorage.setItem(
+              'weatherData',
+              JSON.stringify(updatedWeatherData)
+            );
+            return updatedWeatherData;
+          });
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch((error) => {
+          toast.error(`Failed to refresh weather`);
+        });
+    });
+  };
+
+  // Remove city function
+  const removeCity = (city: string) => {
+    setWeatherData((prev) => {
+      const updatedCities = prev.filter((c) => c.id !== city);
+      localStorage.setItem('weatherData', JSON.stringify(updatedCities));
+      return updatedCities;
+    });
+  };
+
+  const sortedWeatherData = [...weatherData].sort((a, b) =>
     a.city.localeCompare(b.city)
   );
 
-  return { weatherData: sortedWeatherData, loading, error };
+  return {
+    weatherData: sortedWeatherData,
+    loading,
+    refreshData,
+    removeCity,
+  };
 };
 
-export default useFetchWeatherData;
+export default useTopCitiesWeatherData;
