@@ -2,9 +2,7 @@ import CityDetailsPage from '@/pages/CityDetails';
 import HomePage from '@/pages/Home';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-type Props = {};
-
-const AllRoutes = (props: Props) => {
+const AllRoutes = () => {
   return (
     <Router>
       <Routes>

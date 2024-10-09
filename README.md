@@ -115,7 +115,7 @@ Ensure you have the following installed:
 ## Folder Structure
 
 ```bash
-  weather-app/
+  weather-app-irecharge/
 ├── public/               # Public assets
 ├── src/                  # Source code
 │   ├── components/       # React components

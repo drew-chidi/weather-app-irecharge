@@ -95,9 +95,9 @@ const useTopCitiesWeatherData = (cities: string[]) => {
             return updatedWeatherData;
           });
         })
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .catch((error) => {
           toast.error(`Failed to refresh weather`);
+          throw error;
         });
     });
   };
