@@ -31,6 +31,7 @@ const HomePage = () => {
     favoriteWeatherData,
     loading: isLoadingFavorites,
     removeFavoriteCity,
+    refreshData: refreshFavoriteData,
   } = useFavorites();
 
   const [activateSearch, setActivateSearch] = useState(false);
@@ -141,7 +142,7 @@ const HomePage = () => {
         data={favoriteWeatherData}
         isLoading={isLoadingFavorites}
         onRemove={removeFavoriteCity}
-        onRefresh={fetchUpdatedTopCitiesData}
+        onRefresh={refreshFavoriteData}
       />
       <TopCities
         data={topCitiesResponse}

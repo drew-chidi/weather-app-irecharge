@@ -4,14 +4,7 @@ import { addFavorite, removeFavorite } from '@/redux/features/citySlice';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { RootState } from '@/redux/store';
-
-export interface WeatherData {
-  id: string;
-  city: string;
-  temperature: number;
-  condition: string;
-  icon: string;
-}
+import { ListWeatherData } from '@/types/weather.type';
 
 const useFavorites = () => {
   const dispatch = useDispatch();
@@ -20,12 +13,12 @@ const useFavorites = () => {
   );
 
   // Initialize as an array of objects
-  const [favoriteWeatherData, setFavoriteWeatherData] = useState<WeatherData[]>(
-    () => {
-      const storedData = localStorage.getItem('favoriteWeatherData');
-      return storedData ? JSON.parse(storedData) : [];
-    }
-  );
+  const [favoriteWeatherData, setFavoriteWeatherData] = useState<
+    ListWeatherData[]
+  >(() => {
+    const storedData = localStorage.getItem('favoriteWeatherData');
+    return storedData ? JSON.parse(storedData) : [];
+  });
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +49,7 @@ const useFavorites = () => {
           });
 
           const data = response.data;
-          const transformedData: WeatherData = {
+          const transformedData: ListWeatherData = {
             id: data.location.name,
             city: data.location.name,
             temperature: data.current.temperature,
@@ -89,25 +82,6 @@ const useFavorites = () => {
     }
   }, [favoriteCities]);
 
-  // Function to toggle favorite city
-  const toggleFavorite = (city: string) => {
-    const isFavorite = favoriteCities.includes(city);
-    if (isFavorite) {
-      dispatch(removeFavorite(city));
-
-      // Remove city from local state and localStorage
-      setFavoriteWeatherData((prev) => {
-        const updatedData = prev.filter((item) => item.id !== city);
-        localStorage.setItem(
-          'favoriteWeatherData',
-          JSON.stringify(updatedData)
-        );
-        return updatedData;
-      });
-    } else {
-      dispatch(addFavorite(city));
-    }
-  };
   const addFavoriteCity = (city: string) => {
     if (!favoriteCities.includes(city)) {
       dispatch(addFavorite(city));
@@ -115,17 +89,11 @@ const useFavorites = () => {
   };
 
   const removeFavoriteCity = (city: string) => {
-    console.log({
-      city,
-      favoriteCities,
-      isIncluded: favoriteCities.includes(city),
-    });
     if (favoriteCities.includes(city)) {
       dispatch(removeFavorite(city));
 
       // Remove city from local state and localStorage
       setFavoriteWeatherData((prev) => {
-        console.log({ favoriteWeatherData });
         const updatedData = prev.filter((item) => item.city !== city);
         localStorage.setItem(
           'favoriteWeatherData',
@@ -136,7 +104,43 @@ const useFavorites = () => {
     }
   };
 
-  console.log({ favoriteWeatherData, favoriteCities });
+  // Refresh function
+  const refreshData = () => {
+    localStorage.removeItem('weatherData');
+    setFavoriteWeatherData([]);
+    favoriteCities.forEach((city) => {
+      axios
+        .get(`${apiUrl}/current`, {
+          params: {
+            access_key: accessKey,
+            query: city,
+          },
+        })
+        .then((response) => {
+          const data = response.data;
+          const transformedData: ListWeatherData = {
+            id: data.location.name,
+            city: data.location.name,
+            temperature: data.current.temperature,
+            condition: data.current.weather_descriptions[0],
+            icon: data.current.weather_icons[0],
+          };
+
+          setFavoriteWeatherData((prev) => {
+            const updatedWeatherData = [...prev, transformedData];
+            localStorage.setItem(
+              'weatherData',
+              JSON.stringify(updatedWeatherData)
+            );
+            return updatedWeatherData;
+          });
+        })
+        .catch((error) => {
+          toast.error(`Failed to refresh weather`);
+          throw error;
+        });
+    });
+  };
 
   // Sort favorite weather data alphabetically by city
   const sortedFavoriteWeatherData = [...favoriteWeatherData].sort((a, b) =>
@@ -147,7 +151,7 @@ const useFavorites = () => {
     favoriteWeatherData: sortedFavoriteWeatherData,
     loading,
     error,
-    toggleFavorite,
+    refreshData,
     addFavoriteCity,
     removeFavoriteCity,
   };
