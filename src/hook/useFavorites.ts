@@ -6,6 +6,31 @@ import { toast } from 'sonner';
 import { RootState } from '@/redux/store';
 import { ListWeatherData } from '@/types/weather.type';
 
+/**
+ * A custom hook for managing favorite cities and their weather data in the weather app.
+ *
+ * This hook handles fetching, adding, and removing favorite cities, while also caching weather data in local storage.
+ * It ensures the favorites list and related weather data are persisted and can be refreshed on demand.
+ *
+ * @returns {{
+ *   favoriteWeatherData: ListWeatherData[],      // The sorted array of weather data for favorite cities.
+ *   loading: boolean,                            // The loading state for fetching weather data.
+ *   error: string | null,                        // The error message, if any occurred during data fetching.
+ *   refreshData: () => void,                     // Function to refresh weather data for favorite cities.
+ *   addFavoriteCity: (city: string) => void,     // Function to add a city to the favorite list.
+ *   removeFavoriteCity: (city: string) => void,  // Function to remove a city from the favorite list.
+ * }}
+ * @returns {ListWeatherData[]} favoriteWeatherData - The current weather data for favorite cities.
+ * @returns {boolean} loading - Indicates if data is being fetched.
+ * @returns {string | null} error - The error message if fetching fails.
+ * @returns {() => void} refreshData - Refreshes weather data for favorite cities.
+ * @returns {(city: string) => void} addFavoriteCity - Adds a city to the favorite list.
+ * @returns {(city: string) => void} removeFavoriteCity - Removes a city from the favorite list.
+ */
+
+const apiUrl = import.meta.env.VITE_WEATHERSTACK_URL;
+const accessKey = import.meta.env.VITE_ACCESS_KEY;
+
 const useFavorites = () => {
   const dispatch = useDispatch();
   const favoriteCities = useSelector(
@@ -22,9 +47,6 @@ const useFavorites = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
-  const apiUrl = import.meta.env.VITE_WEATHERSTACK_URL;
-  const accessKey = import.meta.env.VITE_ACCESS_KEY;
 
   // Fetch weather data for favorite cities
   useEffect(() => {

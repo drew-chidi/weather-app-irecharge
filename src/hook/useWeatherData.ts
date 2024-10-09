@@ -3,6 +3,26 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { ListWeatherData } from '@/types/weather.type';
 
+/**
+ * A custom hook for fetching and managing weather data for a list of top cities.
+ *
+ * This hook fetches weather data sequentially for a given list of cities, persists the data in local storage,
+ * and provides functionality to refresh or remove cities from the list. It also ensures that the data is sorted alphabetically by city name.
+ *
+ * @param {string[]} cities - The array of city names for which weather data should be fetched.
+ *
+ * @returns {{
+ *   weatherData: ListWeatherData[],              // The sorted array of weather data for top cities.
+ *   loading: boolean,                            // The loading state for fetching weather data.
+ *   refreshData: () => void,                     // Function to refresh weather data for all cities.
+ *   removeCity: (city: string) => void,          // Function to remove a city from the weather data list.
+ * }}
+ * @returns {ListWeatherData[]} weatherData - The current weather data for the top cities.
+ * @returns {boolean} loading - Indicates if data is being fetched.
+ * @returns {() => void} refreshData - Refreshes weather data for all cities.
+ * @returns {(city: string) => void} removeCity - Removes a city from the weather data list.
+ */
+
 const apiUrl = import.meta.env.VITE_WEATHERSTACK_URL;
 const accessKey = import.meta.env.VITE_ACCESS_KEY;
 
