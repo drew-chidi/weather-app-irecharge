@@ -14,16 +14,16 @@ const SearchResultSection = ({ data, hasFavorite }: Props) => {
   const dispatch = useDispatch();
   const favorites = useSelector((state: RootState) => state.city.favorites);
   const [favorite, setFavorite] = useState(
-    favorites?.includes(data?.location?.region ?? '')
+    favorites?.includes(data?.location?.region)
   );
 
   useEffect(() => {
     // Synchronize the favorite state with the redux store
-    setFavorite(favorites?.includes(data?.location?.region ?? ''));
+    setFavorite(favorites?.includes(data?.location?.region));
   }, [favorites, data?.location?.region]);
 
   const handleFavoriteClick = () => {
-    const region = data?.location?.region ?? '';
+    const region = data?.location?.region;
 
     if (favorite) {
       // If already favorited, remove it

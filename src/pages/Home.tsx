@@ -69,7 +69,11 @@ const HomePage = () => {
   );
 
   useEffect(() => {
-    if (currentLocationResponse && !currentLocationResponse?.success) {
+    if (
+      currentLocationResponse &&
+      !currentLocationResponse?.success &&
+      currentLocationResponse?.error
+    ) {
       toast.error(`${currentLocationResponse?.error?.info}`);
     }
   }, [currentLocationResponse]);

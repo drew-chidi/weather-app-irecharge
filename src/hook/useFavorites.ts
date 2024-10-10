@@ -70,6 +70,11 @@ const useFavorites = () => {
             },
           });
 
+          // if (!response?.data?.status) {
+          //   toast.error(`${response?.data?.error?.info}`);
+          //   return;
+          // }
+
           const data = response.data;
           const transformedData: ListWeatherData = {
             id: data.location.name,
@@ -90,6 +95,9 @@ const useFavorites = () => {
         } catch (error) {
           setError(`${error}: Failed to fetch weather for ${city}`);
           toast.error(`Failed to fetch weather for ${city}`);
+          throw error;
+        } finally {
+          setLoading(false);
         }
       }
 
@@ -141,8 +149,8 @@ const useFavorites = () => {
         .then((response) => {
           const data = response.data;
           const transformedData: ListWeatherData = {
-            id: data.location.name,
-            city: data.location.name,
+            id: city,
+            city: city,
             temperature: data.current.temperature,
             condition: data.current.weather_descriptions[0],
             icon: data.current.weather_icons[0],

@@ -51,7 +51,7 @@ const CityDetailsPage = () => {
       </div>
       <div className='flex gap-14 flex-wrap px-8 sm:px-14 lg:px-20 py-14'>
         <div>
-          <Card className='w-[350px]'>
+          <Card className=''>
             <CardHeader>
               <div className='flex items-center justify-center'>
                 <CardTitle className='font-bold'>{city}</CardTitle>
