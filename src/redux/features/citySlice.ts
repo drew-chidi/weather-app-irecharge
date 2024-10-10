@@ -1,12 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface CityState {
-  cities: string[];
   favorites: string[];
 }
 
 const initialState: CityState = {
-  cities: [],
   favorites: JSON.parse(localStorage.getItem('favorites') || '[]'),
 };
 
@@ -14,9 +12,6 @@ const citySlice = createSlice({
   name: 'city',
   initialState,
   reducers: {
-    addCity: (state, action: PayloadAction<string>) => {
-      state.cities.push(action.payload);
-    },
     addFavorite: (state, action: PayloadAction<string>) => {
       if (!state.favorites.includes(action.payload)) {
         state.favorites.push(action.payload);
@@ -32,5 +27,5 @@ const citySlice = createSlice({
   },
 });
 
-export const { addCity, addFavorite, removeFavorite } = citySlice.actions;
+export const { addFavorite, removeFavorite } = citySlice.actions;
 export default citySlice.reducer;

@@ -1,18 +1,9 @@
 import { InfoIcon } from 'lucide-react';
-import { useEffect } from 'react';
-import { toast } from 'sonner';
 import { CurrentLocationWeatherType } from '@/types/weather.type';
 
 type Props = { data: CurrentLocationWeatherType };
 
 function CurrentWeather({ data }: Props) {
-  useEffect(() => {
-    if (data?.success) return;
-    if (!data?.success) {
-      toast.error(`${data?.error?.info}`);
-    }
-  }, [data]);
-
   return (
     <div>
       {!data || !data?.location || !data?.current ? (

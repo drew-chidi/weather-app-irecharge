@@ -14,7 +14,7 @@ const WeatherInfoCard = ({ current, loading }: Props) => {
       {loading ? (
         <Loader2 className='animate-spin w-14 h-14' />
       ) : (
-        <CardContent className='flex py-6 gap-10'>
+        <CardContent className='flex py-6 gap-10 flex-col md:flex-row '>
           <div className='flex flex-col'>
             <div>
               <p className='text-4xl font-bold lg:text-6xl mb-4'>
